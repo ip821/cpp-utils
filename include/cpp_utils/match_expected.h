@@ -6,8 +6,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace ip
-{
+namespace ip {
     template<typename Exp, typename OnValue>
     using on_value_return_t = std::invoke_result_t<OnValue, decltype(*std::declval<Exp>())>;
 
@@ -36,30 +35,35 @@ namespace ip
 
     template<typename Exp, typename OnValue, typename OnError>
         requires MatchExpectedNonVoidHandlers<Exp &&, OnValue &&, OnError &&>
-    auto match_expected(Exp&& exp, OnValue&& on_value, OnError&& on_error)
-        -> match_return_t<Exp &&, OnValue &&, OnError &&>
-    {
+    auto match_expected(Exp &&exp, OnValue &&on_value, OnError &&on_error)
+        -> match_return_t<Exp &&, OnValue &&, OnError &&> {
         using R = match_return_t<Exp &&, OnValue &&, OnError &&>;
 
-        if (exp.has_value())
-        {
+        if (exp.has_value()) {
             return R(std::in_place, std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp)));
-        } else
-        {
+        } else {
             return R(std::unexpect, std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error()));
         }
     }
 
     template<typename Exp, typename OnValue, typename OnError>
         requires MatchExpectedVoidHandlers<Exp &&, OnValue &&, OnError &&>
-    void match_expected(Exp&& exp, OnValue&& on_value, OnError&& on_error)
-    {
-        if (exp.has_value())
-        {
+    void match_expected(Exp &&exp, OnValue &&on_value, OnError &&on_error) {
+        if (exp.has_value()) {
             std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp));
-        } else
-        {
+        } else {
             std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error());
+        }
+    }
+
+    template<typename Exp, typename OnValue, typename OnError>
+        requires MatchExpectedNonVoidHandlers<Exp &&, OnValue &&, OnError &&>
+    auto match_expected_unwrapped(Exp &&exp, OnValue &&on_value, OnError &&on_error)
+        -> on_value_return_t<Exp &&, OnValue &&> {
+        if (exp.has_value()) {
+            return std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp));
+        } else {
+            return std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error());
         }
     }
 }
