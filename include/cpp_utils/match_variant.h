@@ -14,7 +14,7 @@ namespace ip
     Match(Ts...) -> Match<Ts...>;
 
     template<class Variant, class... Ts>
-    decltype(auto) MatchVariant(Variant&& v, Ts&&... ts)
+    decltype(auto) match_variant(Variant&& v, Ts&&... ts)
     {
         return std::visit(
             Match{std::forward<Ts>(ts)...},
