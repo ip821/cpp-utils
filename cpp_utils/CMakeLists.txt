@@ -5,13 +5,13 @@ project(cpp_utils LANGUAGES CXX)
 add_library(cpp_utils INTERFACE)
 
 target_include_directories(cpp_utils
-    INTERFACE
+        INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
 target_compile_features(cpp_utils
-    INTERFACE
+        INTERFACE
         cxx_std_23
 )
 
