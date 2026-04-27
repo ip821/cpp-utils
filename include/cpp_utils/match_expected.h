@@ -57,35 +57,26 @@ namespace ip {
     }
 
     template<typename Exp, typename OnValue, typename OnError>
-    concept MatchExpectedUnwrappedHandlers =
-            MatchExpectedNonVoidHandlers<Exp, OnValue, OnError> &&
-            std::convertible_to<
-                on_error_return_t<Exp, OnError>,
-                on_value_return_t<Exp, OnValue>
-            >;
+    concept MapExpectedToOptionalHandlers =
+        std::invocable<OnValue, decltype(*std::declval<Exp>())> &&
+        std::invocable<OnError, decltype(std::declval<Exp>().error())> &&
+        !std::same_as<on_value_return_t<Exp, OnValue>, void> &&
+        std::same_as<on_error_return_t<Exp, OnError>, void>;
 
     template<typename Exp, typename OnValue, typename OnError>
-        requires MatchExpectedUnwrappedHandlers<Exp &&, OnValue &&, OnError &&>
-    auto match_expected(
-        Exp &&exp,
-        OnValue &&on_value,
-        OnError &&on_error
-    ) -> on_value_return_t<Exp &&, OnValue &&> {
-        if (exp.has_value()) {
-            return std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp));
-        } else {
-            return std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error());
+        requires MapExpectedToOptionalHandlers<Exp&&, OnValue&&, OnError&&>
+    auto map_expected_to_optional(Exp&& exp, OnValue&& on_value, OnError&& on_error)
+    {
+        using Result = std::remove_cvref_t<on_value_return_t<Exp &&, OnValue &&> >;
+
+        if (exp.has_value())
+        {
+            return std::optional<Result>{std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp))};
+        }
+        else
+        {
+            std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error());
+            return std::optional<Result>{std::nullopt};
         }
     }
-
-    // template<typename Exp, typename OnValue, typename OnError>
-    //     requires MatchExpectedNonVoidHandlers<Exp &&, OnValue &&, OnError &&>
-    // auto match_expected_unwrapped(Exp &&exp, OnValue &&on_value, OnError &&on_error)
-    //     -> on_value_return_t<Exp &&, OnValue &&> {
-    //     if (exp.has_value()) {
-    //         return std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp));
-    //     } else {
-    //         return std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error());
-    //     }
-    // }
 }
