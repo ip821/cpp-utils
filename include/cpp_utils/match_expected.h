@@ -79,4 +79,15 @@ namespace ip {
             return std::optional<Result>{std::nullopt};
         }
     }
+
+    template<typename Exp, typename OnValue, typename OnError>
+        requires MatchExpectedNonVoidHandlers<Exp &&, OnValue &&, OnError &&>
+    auto match_expected_unwrapped(Exp &&exp, OnValue &&on_value, OnError &&on_error)
+        -> on_value_return_t<Exp &&, OnValue &&> {
+        if (exp.has_value()) {
+            return std::invoke(std::forward<OnValue>(on_value), *std::forward<Exp>(exp));
+        } else {
+            return std::invoke(std::forward<OnError>(on_error), std::forward<Exp>(exp).error());
+        }
+    }
 }
