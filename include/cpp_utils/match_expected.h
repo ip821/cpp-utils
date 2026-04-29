@@ -2,6 +2,7 @@
 
 #include <concepts>
 #include <expected>
+#include <optional>
 #include <functional>
 #include <type_traits>
 #include <utility>
