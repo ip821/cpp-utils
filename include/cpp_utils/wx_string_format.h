@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include <format>
+#include <wx/string.h>
+
 template<>
 struct std::formatter<wxString, char> : std::formatter<std::string, char>
 {

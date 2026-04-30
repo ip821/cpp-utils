@@ -6,6 +6,6 @@
         return std::unexpected(result.error());
 
 #define UNWRAP_OR_RETURN_ERROR(result, expr) \
-    const auto result = expr; \
+    const auto& result = expr; \
     if (!result) \
         return std::unexpected(result.error());
