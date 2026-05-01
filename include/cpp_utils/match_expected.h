@@ -36,7 +36,7 @@ namespace ip {
 
     template<typename Exp, typename OnValue, typename OnError>
         requires MatchExpectedNonVoidHandlers<Exp &&, OnValue &&, OnError &&>
-    auto match_expected(Exp &&exp, OnValue &&on_value, OnError &&on_error)
+    auto map_expected(Exp &&exp, OnValue &&on_value, OnError &&on_error)
         -> match_return_t<Exp &&, OnValue &&, OnError &&> {
         using R = match_return_t<Exp &&, OnValue &&, OnError &&>;
 
